@@ -120,15 +120,17 @@ module JitPreloadExtension
             association_scope = klass.all.merge(association(assoc).scope).unscope(where: aggregate_association.foreign_key)
             association_scope = association_scope.instance_exec(&reflection.scope).reorder(nil) if reflection.scope
 
-            # If the query uses an alias for the association, use that instead of the table name
-            table_reference = table_alias_name
-            table_reference ||= association_scope.references_values.first || aggregate_association.table_name
-
             # If the association is a STI child model, specify its type in the condition so that it
             # doesn't include results from other child models
             parent_is_base_class = aggregate_association.klass.superclass.abstract_class? || aggregate_association.klass.superclass == ActiveRecord::Base
             has_type_column = aggregate_association.klass.column_names.include?(aggregate_association.klass.inheritance_column)
             is_child_sti_model = !parent_is_base_class && has_type_column
+
+            # If the query uses an alias for the association, use that instead of the table name
+            table_reference = table_alias_name
+            table_reference ||= association_scope.references_values.first if has_type_column
+            table_reference ||= aggregate_association.table_name
+
             if is_child_sti_model
               conditions[table_reference] = { aggregate_association.klass.inheritance_column => aggregate_association.klass.sti_name }
             end
