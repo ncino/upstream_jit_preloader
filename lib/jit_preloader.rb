@@ -1,3 +1,4 @@
+require 'logger'
 require 'active_support/concern'
 require 'active_support/core_ext/module/delegation'
 require 'active_support/notifications'

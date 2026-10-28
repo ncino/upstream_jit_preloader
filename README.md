@@ -1,5 +1,28 @@
 # JitPreloader
 
+## nCino fork compatibility
+
+Version `3.1.0.ncino1` is based on upstream 3.1.0 and supports ActiveRecord
+`>= 6.1, < 7.3`. It retains nCino's fix for aggregate association scopes with
+joins, preserves caller filters on STI aggregates, and retains through joins
+when an aggregate scope starts from a model class. Load the gem normally;
+`logger` is required before ActiveRecord so 6.1/7.0 load independently of Rails.
+
+CI runs the complete suite on Ruby 3.1.6 with ActiveRecord and ActiveSupport
+6.1, 7.0, 7.1, and 7.2. Each series has a reviewed lockfile, including the
+Linux CI platform. To run one bundle under Ruby 3.1.6:
+
+```sh
+BUNDLE_GEMFILE=Gemfile.6.1 bundle install
+AR_SERIES=6.1 BUNDLE_GEMFILE=Gemfile.6.1 bundle exec ruby -Ilib scripts/check_load.rb
+BUNDLE_GEMFILE=Gemfile.6.1 bundle exec rspec
+```
+
+Replace `6.1` with `7.0`, `7.1`, or `7.2` for the other lanes. The default
+Gemfile also selects 6.1. CI uses Bundler 2.5.23 and frozen installs.
+Consumers can pin a validated commit from `ncino/upstream_jit_preloader`;
+publishing this fork to RubyGems is not required.
+
 N+1 queries are a silent killer for performance. Sometimes they can be noticeable; other times they're just a minor tax. We want a way to remove them.
 
 Imagine you have contacts that have many emails, phone numbers, and addresses. You might have code like this:

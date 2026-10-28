@@ -5,27 +5,32 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
+    name: ActiveRecord ${{ matrix.activerecord }} / Ruby 3.1.6
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        gemfile:
-          - Gemfile
-          - Gemfile.6.1
+        activerecord: ['6.1', '7.0', '7.1', '7.2']
     env:
-      BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+      BUNDLE_GEMFILE: Gemfile.${{ matrix.activerecord }}
+      BUNDLE_FROZEN: 'true'
+      AR_SERIES: ${{ matrix.activerecord }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Ruby ${{ matrix.ruby-version }}
-        uses: ruby/setup-ruby@v1
+      - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1
-      - name: Install dependencies
-        run: bundle install
-      - name: Run tests
-        run:
-          bundle exec rspec
+          ruby-version: '3.1.6'
+          bundler: '2.5.23'
+          bundler-cache: true
+      - name: Verify clean loading and resolved versions
+        run: bundle exec ruby -Ilib scripts/check_load.rb
+      - name: Run the full suite
+        run: bundle exec rspec
