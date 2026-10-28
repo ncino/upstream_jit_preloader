@@ -101,6 +101,8 @@ module JitPreloadExtension
           key = "#{method_name}|#{conditions.sort.hash}"
           return jit_preload_aggregates[key] if jit_preload_aggregates.key?(key)
           if jit_preloader
+            # Add association constraints without changing the caller's filters or cache key.
+            conditions = conditions.dup
             reflection = association(assoc).reflection
             primary_ids = jit_preloader.records.collect{|r| r[reflection.active_record_primary_key] }
             max_ids_per_query = max_ids_per_query || JitPreloader.max_ids_per_query
@@ -132,7 +134,7 @@ module JitPreloadExtension
             table_reference ||= aggregate_association.table_name
 
             if is_child_sti_model
-              conditions[table_reference] = { aggregate_association.klass.inheritance_column => aggregate_association.klass.sti_name }
+              conditions = conditions.deep_merge(table_reference => { aggregate_association.klass.inheritance_column => aggregate_association.klass.sti_name })
             end
 
             if reflection.type.present?
