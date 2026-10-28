@@ -120,7 +120,10 @@ module JitPreloadExtension
             end
 
             association_scope = klass.all.merge(association(assoc).scope).unscope(where: aggregate_association.foreign_key)
-            association_scope = association_scope.instance_exec(&reflection.scope).reorder(nil) if reflection.scope
+            if reflection.scope
+              scoped_relation = association_scope.instance_exec(&reflection.scope)
+              association_scope = association_scope.merge(scoped_relation).reorder(nil)
+            end
 
             # If the association is a STI child model, specify its type in the condition so that it
             # doesn't include results from other child models
