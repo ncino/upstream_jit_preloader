@@ -1,4 +1,7 @@
 source 'https://rubygems.org'
 
+gem "activerecord", "~> 6.1.0"
+gem "activesupport", "~> 6.1.0"
+gem "sqlite3", "~> 1.4"
 # Specify your gem's dependencies in jit_preloader.gemspec
 gemspec

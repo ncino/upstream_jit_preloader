@@ -1,3 +1,3 @@
 module JitPreloader
-  VERSION = "1.0.4"
+  VERSION = "3.1.0.ncino1"
 end
